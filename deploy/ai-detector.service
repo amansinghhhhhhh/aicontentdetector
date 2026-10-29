@@ -1,0 +1,17 @@
+[Unit]
+Description=AI Content Detector API
+After=network.target
+
+[Service]
+User=aidetector
+Group=aidetector
+WorkingDirectory=/opt/ai-detector
+Environment=PYTHONPATH=/opt/ai-detector
+Environment=DETECTOR_BACKEND=onnx
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/ai-detector/.venv/bin/uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

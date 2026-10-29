@@ -1,0 +1,16 @@
+# Install order (see README):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r ml/requirements.txt
+torch>=2.4
+transformers>=4.45
+sentencepiece>=0.2
+safetensors>=0.4
+numpy>=1.26
+scikit-learn>=1.5
+datasets>=3.0
+tqdm>=4.66
+# ONNX export + serving (int8 quantization collapses accuracy on this
+# DeBERTa-v3 model, so the serving model is fp32: models/detector-onnx/)
+onnxruntime>=1.18
+onnx>=1.16
+onnxscript>=0.1
