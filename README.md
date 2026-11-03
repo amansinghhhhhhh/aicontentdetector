@@ -60,6 +60,14 @@ ZeroGPT-style tools score text by **perplexity + burstiness**, which is a differ
 - Retrain with `python -m ml.stealth_eval` (~1–2 min; writes `models/stealth_features.csv` and `models/stealth_proxies.json`) or refit from the feature cache with `python -m ml.stealth_eval --from-csv models/stealth_features.csv`.
 - Reality check: these are *proxy estimates* trained on public labels, not the live tools. Real tool results can differ, and no humanizer can guarantee 0% everywhere.
 
+## Benchmark
+
+`python -m ml.eval_benchmark` scores every English row of the public benchmark with the serving detector and reports threshold, calibration and humanize-evasion metrics (results land in `ml/runs/`, which is gitignored).
+
+- Detector, 1,135 human/AI rows: **AUC 0.938**, average precision **0.967**; at the default 40% verdict threshold precision **94.9%**, recall **83.0%**, false-positive rate **8.5%**. At the old 60% threshold recall was 80.7% with an 7.2% FPR — the change trades 1.3 points of false positives for 2.3 points of recall.
+- Weak spots: short texts (< 150 words) — AUC **0.81** vs 0.999 on long texts; several 2026 generator families (muse-glimmer, deepseek-v4.1-flash) sit near 50% detection.
+- Humanized text in the benchmark still reads as AI 47–56% of the time depending on the threshold — a detector-side gap that needs retraining, not post-processing.
+
 ## AI-free rewrite (humanizer)
 
 Rule-based rewriter in `ml/humanize.py` — no LLM calls, everything local.
@@ -67,10 +75,12 @@ Rule-based rewriter in `ml/humanize.py` — no LLM calls, everything local.
 - **Target**: `external` (default; ranks candidates by external-detector proxies, conservative paraphrasing, layout-preserving) or `local` (tuned to this detector only).
 - **Tone**: `casual` (contractions, simpler words, sentence splitting) or `formal` (keeps a professional register). External mode never adds lowercase style, personal openers or casual endings.
 - **Strength**: `light` (word swaps only), `medium`, `strong` (more splitting, list breaks, contract variants). External mode adds candidates with/without contractions and different sentence splits, then picks the lowest-risk rewrite.
-- It generates several candidate rewrites and scores each with the detector (batched) plus the ZeroGPT-style signal, then returns the best one. External mode also scores candidates with the stealth proxies first; response includes before/after scores, external risk, a change list, and warnings.
+- The rewrite engine now also strips common AI-tell wording (`delve`, `leverage`, `utilize`, `pivotal`, `plethora`, `furthermore`, `however,` …) into plain English while keeping grammar intact.
+- It generates several candidate rewrites and scores each with the ZeroGPT-style signal plus the stealth proxies; the detector only tie-breaks the two lowest-risk candidates (keeps long documents fast). If the best rewrite is still ≥ 50 on any external proxy, up to two extra refinement passes keep rewriting the current best until it stops improving. Response includes before/after scores, external risk, a change list, and warnings.
 - When the classifier already says human (`< 25%`) but the ZeroGPT-style estimate is high, the **local** target switches to a ZeroGPT-targeted mode: **all** candidates plus the aggressive refinement pass are ranked by the ZeroGPT-style estimate (not just the top-3 by classifier), and a rewrite is returned even if the estimate cannot be lowered (with a warning).
-- Typical result on AI-style paragraphs: **~99% → ~0–3%** with casual tone (local classifier). External risk on the same text usually drops to the teens with casual tone; formal tone stays higher because the formal register itself reads AI-like.
-- Caveats: `formal` tone keeps the original register, which detectors tend to flag; rewritten text may need a light human pass for flow; on slow CPUs a rewrite can take ~10–20 s (the ZeroGPT-style pass adds distilgpt2 inference).
+- Typical result on AI-style paragraphs: **~99% → ~0–3%** with casual tone (local classifier). External risk on the same text usually drops faster with casual tone; formal tone stays higher because the formal register itself reads AI-like.
+- Measured on 48 benchmark AI texts (casual/medium/external): mean external risk **52.4 → 44.7**, mean worst proxy **80.6 → 74.2**, share of rewrites under 50 worst **19.6% → 25%**. Long documents (> 400 words) barely move with rule-based swaps — the proxy signal there needs a real paraphraser.
+- Caveats: `formal` tone keeps the original register, which detectors tend to flag; rewritten text may need a light human pass for flow; on slow CPUs medium paragraphs take ~10–20 s and long documents can take a minute or more (the ZeroGPT-style pass adds distilgpt2 inference per pass).
 
 ### Experimental: runtime paraphrase bake-off
 

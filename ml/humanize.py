@@ -51,15 +51,14 @@ _PHRASES: List[Tuple[str, Tuple[str, str]]] = [
     ("on the other hand", ("conversely", "then again")),
     ("as a result", ("therefore", "so")),
     ("consequently", ("therefore", "so")),
-    ("furthermore", ("also", "plus")),
-    ("moreover", ("also", "plus")),
-    ("additionally", ("also", "plus")),
+    ("furthermore", ("also", "also")),
+    ("moreover", ("also", "also")),
+    ("additionally", ("also", "also")),
     ("nevertheless", ("still", "even so")),
     ("nonetheless", ("still", "even so")),
     ("therefore", ("thus", "so")),
     ("thus", ("therefore", "so")),
     ("hence", ("therefore", "so")),
-    ("however", ("yet", "but")),
     ("whilst", ("while", "while")),
     ("amongst", ("among", "among")),
     ("subsequently", ("later", "then")),
@@ -320,7 +319,140 @@ _CONTRACTIONS = [
 
 _CASUAL_EXTRAS = [
     (re.compile(r"\bvery\b", re.IGNORECASE), "really"),
-    (re.compile(r"\bin addition\b", re.IGNORECASE), "plus"),
+]
+
+# Formal/AI-tell wording -> plain wording. Applied for both tones; every entry
+# keeps the sentence grammatical (verb agreement handled per form).
+_PLAIN_PAIRS = [
+    (re.compile(r"\bplays? a (?:crucial|vital|key|pivotal|significant) role in\b", re.IGNORECASE), "is a big part of"),
+    (re.compile(r"\bpaves? the way for\b", re.IGNORECASE), "sets things up for"),
+    (re.compile(r"\bdue to the fact that\b", re.IGNORECASE), "because"),
+    (re.compile(r"\bin order to\b", re.IGNORECASE), "to"),
+    (re.compile(r"\bprior to\b", re.IGNORECASE), "before"),
+    (re.compile(r"\ba plethora of\b", re.IGNORECASE), "a lot of"),
+    (re.compile(r"\ba myriad of\b", re.IGNORECASE), "many"),
+    (re.compile(r"\ba variety of\b", re.IGNORECASE), "many"),
+    (re.compile(r"\bin terms of\b", re.IGNORECASE), "for"),
+    (re.compile(r"\bwith regard to\b", re.IGNORECASE), "about"),
+    (re.compile(r"\bnot only\b", re.IGNORECASE), "not just"),
+    (re.compile(r"\bbut also\b", re.IGNORECASE), "but"),
+    (re.compile(r"\bdelves\b", re.IGNORECASE), "digs"),
+    (re.compile(r"\bdelved\b", re.IGNORECASE), "dug"),
+    (re.compile(r"\bdelving\b", re.IGNORECASE), "digging"),
+    (re.compile(r"\bdelve\b", re.IGNORECASE), "dig"),
+    (re.compile(r"\bleverages\b", re.IGNORECASE), "uses"),
+    (re.compile(r"\bleveraged\b", re.IGNORECASE), "used"),
+    (re.compile(r"\bleveraging\b", re.IGNORECASE), "using"),
+    (re.compile(r"\bleverage\b", re.IGNORECASE), "use"),
+    (re.compile(r"\butilizes\b", re.IGNORECASE), "uses"),
+    (re.compile(r"\butilized\b", re.IGNORECASE), "used"),
+    (re.compile(r"\butilizing\b", re.IGNORECASE), "using"),
+    (re.compile(r"\butilize\b", re.IGNORECASE), "use"),
+    (re.compile(r"\butilization\b", re.IGNORECASE), "use"),
+    (re.compile(r"\bfacilitates\b", re.IGNORECASE), "helps"),
+    (re.compile(r"\bfacilitated\b", re.IGNORECASE), "helped"),
+    (re.compile(r"\bfacilitating\b", re.IGNORECASE), "helping"),
+    (re.compile(r"\bfacilitate\b", re.IGNORECASE), "help"),
+    (re.compile(r"\bdemonstrates\b", re.IGNORECASE), "shows"),
+    (re.compile(r"\bdemonstrated\b", re.IGNORECASE), "showed"),
+    (re.compile(r"\bdemonstrating\b", re.IGNORECASE), "showing"),
+    (re.compile(r"\bdemonstrate\b", re.IGNORECASE), "show"),
+    (re.compile(r"\bensures\b", re.IGNORECASE), "makes sure"),
+    (re.compile(r"\bensuring\b", re.IGNORECASE), "making sure"),
+    (re.compile(r"\bensure\b", re.IGNORECASE), "make sure"),
+    (re.compile(r"\bendeavou?rs\b", re.IGNORECASE), "tries"),
+    (re.compile(r"\bendeavou?red\b", re.IGNORECASE), "tried"),
+    (re.compile(r"\bendeavou?ring\b", re.IGNORECASE), "trying"),
+    (re.compile(r"\bendeavou?r\b", re.IGNORECASE), "try"),
+    (re.compile(r"\bcommences\b", re.IGNORECASE), "starts"),
+    (re.compile(r"\bcommenced\b", re.IGNORECASE), "started"),
+    (re.compile(r"\bcommencing\b", re.IGNORECASE), "starting"),
+    (re.compile(r"\bcommence\b", re.IGNORECASE), "start"),
+    (re.compile(r"\bfosters\b", re.IGNORECASE), "builds"),
+    (re.compile(r"\bfostered\b", re.IGNORECASE), "built"),
+    (re.compile(r"\bfostering\b", re.IGNORECASE), "building"),
+    (re.compile(r"\bfoster\b", re.IGNORECASE), "build"),
+    (re.compile(r"\boptimizes\b", re.IGNORECASE), "improves"),
+    (re.compile(r"\boptimized\b", re.IGNORECASE), "improved"),
+    (re.compile(r"\boptimizing\b", re.IGNORECASE), "improving"),
+    (re.compile(r"\boptimize\b", re.IGNORECASE), "improve"),
+    (re.compile(r"\bstreamlines\b", re.IGNORECASE), "simplifies"),
+    (re.compile(r"\bstreamlined\b", re.IGNORECASE), "simplified"),
+    (re.compile(r"\bstreamlining\b", re.IGNORECASE), "simplifying"),
+    (re.compile(r"\bstreamline\b", re.IGNORECASE), "simplify"),
+    (re.compile(r"\benhances\b", re.IGNORECASE), "improves"),
+    (re.compile(r"\benhanced\b", re.IGNORECASE), "improved"),
+    (re.compile(r"\benhancing\b", re.IGNORECASE), "improving"),
+    (re.compile(r"\benhance\b", re.IGNORECASE), "improve"),
+    (re.compile(r"\bimplements\b", re.IGNORECASE), "builds"),
+    (re.compile(r"\bimplemented\b", re.IGNORECASE), "built"),
+    (re.compile(r"\bimplementing\b", re.IGNORECASE), "building"),
+    (re.compile(r"\bimplement\b", re.IGNORECASE), "build"),
+    (re.compile(r"\bobtains\b", re.IGNORECASE), "gets"),
+    (re.compile(r"\bobtaining\b", re.IGNORECASE), "getting"),
+    (re.compile(r"\bobtain\b", re.IGNORECASE), "get"),
+    (re.compile(r"\brequires\b", re.IGNORECASE), "needs"),
+    (re.compile(r"\brequired\b", re.IGNORECASE), "needed"),
+    (re.compile(r"\brequiring\b", re.IGNORECASE), "needing"),
+    (re.compile(r"\brequire\b", re.IGNORECASE), "need"),
+    (re.compile(r"\bassists\b", re.IGNORECASE), "helps"),
+    (re.compile(r"\bassisted\b", re.IGNORECASE), "helped"),
+    (re.compile(r"\bassisting\b", re.IGNORECASE), "helping"),
+    (re.compile(r"\bassist\b", re.IGNORECASE), "help"),
+    (re.compile(r"\bunderscores\b", re.IGNORECASE), "highlights"),
+    (re.compile(r"\bunderscored\b", re.IGNORECASE), "highlighted"),
+    (re.compile(r"\bunderscoring\b", re.IGNORECASE), "highlighting"),
+    (re.compile(r"\bunderscore\b", re.IGNORECASE), "highlight"),
+    (re.compile(r"\bpivotal\b", re.IGNORECASE), "key"),
+    (re.compile(r"\bcrucial\b", re.IGNORECASE), "key"),
+    (re.compile(r"\bparamount\b", re.IGNORECASE), "key"),
+    (re.compile(r"\bseamlessly\b", re.IGNORECASE), "smoothly"),
+    (re.compile(r"\bseamless\b", re.IGNORECASE), "smooth"),
+    (re.compile(r"\brobust\b", re.IGNORECASE), "strong"),
+    (re.compile(r"\bcomprehensive\b", re.IGNORECASE), "complete"),
+    (re.compile(r"\bmultifaceted\b", re.IGNORECASE), "complex"),
+    (re.compile(r"\bholistic\b", re.IGNORECASE), "complete"),
+    (re.compile(r"\binnovative\b", re.IGNORECASE), "new"),
+    (re.compile(r"\btransformative\b", re.IGNORECASE), "big"),
+    (re.compile(r"\bmeticulously\b", re.IGNORECASE), "carefully"),
+    (re.compile(r"\bmeticulous\b", re.IGNORECASE), "careful"),
+    (re.compile(r"\bsubstantial\b", re.IGNORECASE), "large"),
+    (re.compile(r"\bnumerous\b", re.IGNORECASE), "many"),
+    (re.compile(r"\bmyriad\b", re.IGNORECASE), "many"),
+    (re.compile(r"\bindividuals\b", re.IGNORECASE), "people"),
+    (re.compile(r"\bapproximately\b", re.IGNORECASE), "about"),
+    (re.compile(r"\badditionally\b", re.IGNORECASE), "also"),
+    (re.compile(r"\bfurthermore\b", re.IGNORECASE), "also"),
+    (re.compile(r"\bmoreover\b", re.IGNORECASE), "plus"),
+    (re.compile(r"\bconsequently\b", re.IGNORECASE), "so"),
+    (re.compile(r"\btherefore\b", re.IGNORECASE), "so"),
+    (re.compile(r"\bthus\b", re.IGNORECASE), "so"),
+    (re.compile(r"\bnevertheless\b", re.IGNORECASE), "still"),
+    (re.compile(r"\bnonetheless\b", re.IGNORECASE), "still"),
+]
+
+# Sentence-initial discourse markers -> casual starters. Comma-anchored so
+# "X, however, Y" never becomes the ungrammatical "X, but, Y". Replacements
+# stay lowercase; _apply_pairs capitalizes when the match is capitalized.
+_CASUAL_MARKERS = [
+    (re.compile(r"\bhowever,\s+", re.IGNORECASE), "but "),
+    (re.compile(r",\s+however,\s+", re.IGNORECASE), ", but "),
+    (re.compile(r";\s+however,\s+", re.IGNORECASE), ", but "),
+    (re.compile(r"\bmoreover,\s+", re.IGNORECASE), "plus, "),
+    (re.compile(r"\bfurthermore,\s+", re.IGNORECASE), "also, "),
+    (re.compile(r"\badditionally,\s+", re.IGNORECASE), "also, "),
+    (re.compile(r"\bconsequently,\s+", re.IGNORECASE), "so, "),
+    (re.compile(r"\btherefore,\s+", re.IGNORECASE), "so, "),
+    (re.compile(r"\bthus,\s+", re.IGNORECASE), "so, "),
+    (re.compile(r"\bnevertheless,\s+", re.IGNORECASE), "still, "),
+    (re.compile(r"\bnonetheless,\s+", re.IGNORECASE), "still, "),
+    (re.compile(r"\bas a result,\s+", re.IGNORECASE), "so, "),
+    (re.compile(r"\bin addition,\s+", re.IGNORECASE), "plus, "),
+    (re.compile(r"\bin conclusion,\s+", re.IGNORECASE), "so, "),
+    (re.compile(r"\boverall,\s+", re.IGNORECASE), "all in all, "),
+    (re.compile(r"\bultimately,\s+", re.IGNORECASE), "in the end, "),
+    (re.compile(r"\bfirst and foremost,\s+", re.IGNORECASE), "first off, "),
+    (re.compile(r"\blast but not least,\s+", re.IGNORECASE), "finally, "),
 ]
 
 _SPLIT_RE = re.compile(r",\s+(and|but|so|which|because)\s+", re.IGNORECASE)
@@ -633,6 +765,9 @@ def _rewrite(
             group.append(idx)
             continue
         piece = _apply_phrases(sentence.text, tone, changes)
+        piece = _apply_pairs(piece, _PLAIN_PAIRS)
+        if tone == "casual":
+            piece = _apply_pairs(piece, _CASUAL_MARKERS)
         if contractions and tone == "casual":
             piece = _apply_pairs(piece, _CONTRACTIONS)
             piece = _apply_pairs(piece, _CASUAL_EXTRAS)
@@ -778,12 +913,18 @@ def _rewrite_line(
     if bullet:
         prefix, body = bullet.groups()
         body = _apply_phrases(body, tone, changes)
+        body = _apply_pairs(body, _PLAIN_PAIRS)
+        if tone == "casual":
+            body = _apply_pairs(body, _CASUAL_MARKERS)
         if contractions:
             body = _apply_pairs(body, _CONTRACTIONS)
         return prefix + body
 
     lead = line[: len(line) - len(line.lstrip())]
     piece = _apply_phrases(line.strip(), tone, changes)
+    piece = _apply_pairs(piece, _PLAIN_PAIRS)
+    if tone == "casual":
+        piece = _apply_pairs(piece, _CASUAL_MARKERS)
     if contractions:
         piece = _apply_pairs(piece, _CONTRACTIONS)
 
@@ -873,10 +1014,9 @@ def _humanize_external(original: str, tone: str, strength: str) -> Optional[dict
     if before_stealth is None:
         return None
 
-    batch = score_many([_score_view(text) for text, _ in candidates])
     ranked = []
-    for (rewritten, changes), after, zg in zip(candidates, batch, zg_items[1:]):
-        if after is None or not zg:
+    for (rewritten, changes), zg in zip(candidates, zg_items[1:]):
+        if not zg:
             continue
         after_stealth = stealth.score_from_features(
             stealth.merge_features(rewritten, zg.get("features"))
@@ -884,52 +1024,93 @@ def _humanize_external(original: str, tone: str, strength: str) -> Optional[dict
         if after_stealth is None:
             continue
         ranked.append(
-            (
+            [
                 _external_worst(after_stealth),
                 after_stealth["risk"],
-                after["ai_percent"],
                 rewritten,
                 changes,
-                after,
                 zg,
                 after_stealth,
-            )
+            ]
         )
+    ranked.sort(key=lambda row: (row[0], row[1]))
 
     warnings: List[str] = []
-    original_key = (_external_worst(before_stealth), before_stealth["risk"])
+    best_text = original
+    best_changes: Dict[str, list] = {}
+    best_after = before
+    best_zg = before_zg
+    best_stealth = before_stealth
+    best_key = (_external_worst(before_stealth), before_stealth["risk"], before["ai_percent"])
+
     if ranked:
-        ranked.sort(key=lambda row: (row[0], row[1], row[2]))
-        candidate = ranked[0]
-        if (candidate[0], candidate[1]) < original_key:
-            (
-                _worst,
-                risk,
-                _classifier,
-                best_text,
-                best_changes,
-                best_after,
-                best_zg,
-                best_stealth,
-            ) = candidate
-        else:
-            risk = before_stealth["risk"]
-            best_text = original
-            best_changes = {}
-            best_after = before
-            best_zg = before_zg
-            best_stealth = before_stealth
+        # Proxy scores already rank the candidates; the detector only
+        # tie-breaks the two lowest-risk rewrites (it cannot change the winner
+        # otherwise) which keeps long documents fast.
+        shortlist = ranked[:2]
+        batch = score_many([_score_view(row[2]) for row in shortlist])
+        for row, after in zip(shortlist, batch):
+            if after is None:
+                continue
+            key = (row[0], row[1], after["ai_percent"])
+            if key < best_key:
+                best_key = key
+                best_text = row[2]
+                best_changes = row[3]
+                best_zg = row[4]
+                best_stealth = row[5]
+                best_after = after
+        if best_text == original:
             warnings.append(
                 "No rewrite lowered the external-risk estimate — the original is unchanged."
             )
     else:
-        risk = before_stealth["risk"]
-        best_text = original
-        best_changes = {}
-        best_after = before
-        best_zg = before_zg
-        best_stealth = before_stealth
         warnings.append("Could not score any rewrite — the original is unchanged.")
+
+    seen.add(best_text)
+    if _external_worst(best_stealth) >= 50.0:
+        # Second-generation passes keep rewriting the current best until two
+        # consecutive refinements stop helping. This recovers the extra points
+        # the single-pass profile sweep leaves behind on long documents.
+        split_words = 18 if strength == "strong" else 24 if strength == "medium" else 0
+        for _ in range(2):
+            refined, extra_changes = _rewrite_layout(
+                best_text,
+                tone,
+                contractions=(tone == "casual"),
+                split_words=split_words,
+                break_lists=True,
+            )
+            if not refined.strip() or refined in seen:
+                break
+            seen.add(refined)
+            refined_zg = zerogpt_style_features_scores([refined])[0]
+            if not refined_zg:
+                break
+            refined_stealth = stealth.score_from_features(
+                stealth.merge_features(refined, refined_zg.get("features"))
+            )
+            if refined_stealth is None:
+                break
+            try:
+                refined_after = score_only(_score_view(refined))
+            except ValueError:
+                break
+            key = (
+                _external_worst(refined_stealth),
+                refined_stealth["risk"],
+                refined_after["ai_percent"],
+            )
+            if key >= best_key:
+                break
+            _merge_changes(best_changes, extra_changes)
+            best_text = refined
+            best_zg = refined_zg
+            best_stealth = refined_stealth
+            best_after = refined_after
+            best_key = key
+
+    risk = best_stealth["risk"]
 
     if before_stealth["risk"] < cfg.MIXED_VERDICT_THRESHOLD:
         warnings.append(

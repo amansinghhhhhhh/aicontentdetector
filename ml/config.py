@@ -26,7 +26,9 @@ DEFAULT_LABELS = ["human", "ai", "ai_edited", "humanized"]
 HUMAN_LABEL = "human"
 
 # ai_score is 1 - P(human); verdict thresholds on the CALIBRATED display percent.
-AI_VERDICT_THRESHOLD = float(os.environ.get("AI_VERDICT_THRESHOLD", "60"))
+# 40 was picked on the full public benchmark (1,135 human/ai rows): vs 60 it
+# trades +2.2 points of AI recall for +1.3 points of false positives.
+AI_VERDICT_THRESHOLD = float(os.environ.get("AI_VERDICT_THRESHOLD", "40"))
 MIXED_VERDICT_THRESHOLD = float(os.environ.get("MIXED_VERDICT_THRESHOLD", "25"))
 MIN_RELIABLE_WORDS = 50
 
